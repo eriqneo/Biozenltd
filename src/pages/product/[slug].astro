@@ -1,0 +1,147 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import ProductImage from '../../components/ProductImage.astro';
+import BuyBox from '../../components/islands/BuyBox';
+import { getAllProducts, getBrand, getCategoryById, getRelated, rootCategoryId } from '../../lib/catalog';
+import { formatKES, stockLabel, stockTone } from '../../lib/format';
+import { whatsappLink } from '../../lib/site';
+import type { Product } from '../../lib/types';
+
+export async function getStaticPaths() {
+  const all = await getAllProducts();
+  return all.map((product) => ({ params: { slug: product.slug }, props: { product } }));
+}
+
+const { product: p } = Astro.props as { product: Product };
+const [cat, root, brand, related] = await Promise.all([
+  getCategoryById(p.category),
+  getCategoryById(rootCategoryId(p.category)),
+  getBrand(p.brand),
+  getRelated(p),
+]);
+
+const crumbs = [{ label: 'Shop', href: '/shop' }];
+if (root) crumbs.push({ label: root.name, href: `/shop/${root.slug}` });
+if (cat && root && cat.id !== root.id) crumbs.push({ label: cat.name, href: `/shop/${root.slug}/${cat.slug}` });
+
+const quoteOnly = p.quote_only;
+const orderable = p.stock !== 'out_of_stock';
+const onSale = !quoteOnly && p.compare_at_price && p.compare_at_price > p.price;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: p.name,
+  description: p.summary,
+  sku: p.sku,
+  brand: brand ? { '@type': 'Brand', name: brand.name } : undefined,
+  image: p.images.length ? p.images : undefined,
+  offers: quoteOnly
+    ? undefined
+    : {
+        '@type': 'Offer',
+        priceCurrency: 'KES',
+        price: p.price,
+        availability: p.stock === 'out_of_stock' ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+      },
+};
+---
+
+<Base title={p.name} description={p.summary}>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} slot="head" />
+  <div class="container-x py-8 space-y-10">
+    <Breadcrumbs items={[...crumbs, { label: p.name }]} />
+
+    <div class="grid gap-8 lg:grid-cols-2">
+      <div class="card overflow-hidden">
+        <ProductImage src={p.images[0]} alt={p.name} class="aspect-[4/3] w-full" />
+      </div>
+
+      <div class="space-y-5">
+        <div class="space-y-2">
+          {brand && <p class="eyebrow">{brand.name}</p>}
+          <h1 class="text-3xl font-bold tracking-tight">{p.name}</h1>
+          <p class="text-ink-600">{p.summary}</p>
+          <p class="text-xs text-ink-500">SKU {p.sku}</p>
+        </div>
+
+        <!-- One price state only: a price, or "price on quote". Never both. -->
+        <div class="flex flex-wrap items-center gap-3">
+          {quoteOnly ? (
+            <p class="text-2xl font-semibold text-brand-800">Price on quote</p>
+          ) : (
+            <p class="flex items-baseline gap-3">
+              <span class="text-3xl font-bold tabular-nums">{formatKES(p.price)}</span>
+              {onSale && <s class="text-ink-500 tabular-nums">{formatKES(p.compare_at_price!)}</s>}
+              <span class="text-xs text-ink-500">incl. VAT</span>
+            </p>
+          )}
+          <span class:list={['rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset', stockTone[p.stock]]}>{stockLabel[p.stock]}</span>
+        </div>
+
+        <ul class="grid grid-cols-2 gap-3 text-sm">
+          <li class="card p-3"><span class="block text-ink-500">Warranty</span><span class="font-medium">{p.warranty_months} months</span></li>
+          <li class="card p-3"><span class="block text-ink-500">Installation</span><span class="font-medium">{p.installation_available ? 'Available' : 'Not required'}</span></li>
+        </ul>
+
+        <BuyBox
+          client:load
+          productId={p.id}
+          slug={p.slug}
+          name={p.name}
+          price={p.price}
+          quoteOnly={quoteOnly}
+          orderable={orderable}
+          whatsappHref={whatsappLink(`Hello Biozen, I'm interested in: ${p.name} (SKU ${p.sku}).`)}
+        />
+
+        <p class="text-sm text-ink-600">
+          <a href="/help/delivery" class="underline hover:text-brand-700">Delivery</a> ·
+          <a href="/help/returns" class="underline hover:text-brand-700">Returns</a> ·
+          <a href="/services/warranty" class="underline hover:text-brand-700">Warranty terms</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
+      <section class="card p-6 lg:col-span-2 space-y-3">
+        <h2 class="text-xl font-semibold">About this product</h2>
+        <p class="leading-relaxed text-ink-700">{p.description}</p>
+      </section>
+      <section class="card p-6 space-y-3">
+        <h2 class="text-xl font-semibold">What's in the box</h2>
+        <ul class="list-disc pl-5 space-y-1 text-sm text-ink-700">
+          {p.in_the_box.map((i) => <li>{i}</li>)}
+        </ul>
+        {p.manuals.length > 0 && (
+          <div class="pt-2">
+            <h3 class="font-medium">Manuals</h3>
+            <ul class="text-sm">{p.manuals.map((m, i) => <li><a href={m} class="text-brand-700 underline">Download manual {i + 1} (PDF)</a></li>)}</ul>
+          </div>
+        )}
+      </section>
+      <section class="card p-6 lg:col-span-3">
+        <h2 class="text-xl font-semibold mb-4">Specifications</h2>
+        <dl class="grid sm:grid-cols-2 gap-x-8 text-sm">
+          {Object.entries(p.specs).map(([k, v]) => (
+            <div class="flex justify-between gap-4 border-b border-ink-100 py-2.5">
+              <dt class="text-ink-500">{k}</dt>
+              <dd class="font-medium text-right">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    </div>
+
+    {related.length > 0 && (
+      <section>
+        <h2 class="text-2xl font-bold tracking-tight mb-4">Related equipment</h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {related.map((r) => <ProductCard product={r} />)}
+        </div>
+      </section>
+    )}
+  </div>
+</Base>

@@ -1,0 +1,102 @@
+---
+import { mainNav, site, whatsappLink } from '../lib/site';
+import { formatKES } from '../lib/format';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) => path === href || path.startsWith(href + '/');
+---
+
+<!-- Single promo strip (the inspiration site rendered it twice). -->
+<div class="bg-brand-900 text-brand-50 text-xs">
+  <div class="container-x flex items-center justify-between gap-4 py-2">
+    <p>Free Nairobi delivery over {formatKES(site.freeDeliveryThreshold)} · Installation &amp; warranty on equipment</p>
+    <a href={whatsappLink('Hello Biozen, I have a question.')} target="_blank" rel="noopener" class="hidden sm:inline font-medium hover:underline">
+      WhatsApp {site.phone}
+    </a>
+  </div>
+</div>
+
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-ink-200/70">
+  <div class="container-x flex items-center gap-4 py-3">
+    <a href="/" class="flex items-center gap-2 shrink-0" aria-label={`${site.shortName} home`}>
+      <span class="grid size-9 place-items-center rounded-xl bg-brand-600 text-white font-bold">B</span>
+      <span class="text-lg font-bold tracking-tight">{site.shortName}</span>
+    </a>
+
+    <form action="/shop" method="get" role="search" class="hidden md:flex flex-1 max-w-xl mx-auto">
+      <label for="q-desktop" class="sr-only">Search equipment</label>
+      <input id="q-desktop" name="q" type="search" placeholder="Search beds, monitors, autoclaves…" class="input rounded-r-none" />
+      <button class="rounded-r-lg bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700">Search</button>
+    </form>
+
+    <div class="ml-auto flex items-center gap-5">
+      <a href="/account" class="hidden sm:inline text-sm font-medium text-ink-700 hover:text-brand-700">Account</a>
+      <div class="flex items-center gap-5">
+        <a href="/clinics/quote" class="relative sm:pr-3 text-sm font-medium text-ink-700 hover:text-brand-700" aria-label="Quote list">
+          <span class="hidden sm:inline">Quote list</span>
+          <svg class="sm:hidden size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 4h6M8 4H6a1 1 0 0 0-1 1v15a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-2M9 11h6M9 15h4" stroke-linecap="round" /></svg>
+          <span data-count="quote" hidden class="absolute -top-1.5 -right-2 min-w-5 h-5 px-1 rounded-full bg-brand-600 text-white text-[11px] font-semibold grid place-items-center"></span>
+        </a>
+        <a href="/cart" class="relative text-ink-700 hover:text-brand-700" aria-label="Cart">
+          <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6" stroke-linecap="round" stroke-linejoin="round" /><circle cx="9" cy="20" r="1.3" /><circle cx="17" cy="20" r="1.3" /></svg>
+          <span data-count="cart" hidden class="absolute -top-1.5 -right-2 min-w-5 h-5 px-1 rounded-full bg-brand-600 text-white text-[11px] font-semibold grid place-items-center"></span>
+        </a>
+      </div>
+      <details class="md:hidden relative">
+        <summary class="list-none cursor-pointer p-1" aria-label="Menu">
+          <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" /></svg>
+        </summary>
+        <nav class="absolute right-0 mt-3 w-64 card p-2 shadow-lg" aria-label="Mobile">
+          {mainNav.map((item) => (
+            <a href={item.href} class="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-ink-50">{item.label}</a>
+          ))}
+          <a href="/account" class="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-ink-50">Account</a>
+          <a href="/contact" class="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-ink-50">Contact</a>
+        </nav>
+      </details>
+    </div>
+  </div>
+
+  <form action="/shop" method="get" role="search" class="md:hidden container-x pb-3 flex">
+    <label for="q-mobile" class="sr-only">Search equipment</label>
+    <input id="q-mobile" name="q" type="search" placeholder="Search equipment…" class="input rounded-r-none" />
+    <button class="rounded-r-lg bg-brand-600 px-4 text-sm font-semibold text-white">Go</button>
+  </form>
+
+  <nav class="hidden md:block border-t border-ink-100" aria-label="Main">
+    <ul class="container-x flex gap-1 text-sm font-medium">
+      {mainNav.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            class:list={['inline-block px-3 py-2.5 border-b-2', isActive(item.href) ? 'border-brand-600 text-brand-800' : 'border-transparent text-ink-700 hover:text-brand-700']}
+            aria-current={isActive(item.href) ? 'page' : undefined}
+          >{item.label}</a>
+        </li>
+      ))}
+      <li class="ml-auto"><a href="/clinics/quote" class="inline-block px-3 py-2.5 font-semibold text-brand-700 hover:underline">Request a quote →</a></li>
+    </ul>
+  </nav>
+</header>
+
+<script>
+  // Header cart/quote counts without shipping React to every page.
+  const keys = { cart: 'bz-cart', quote: 'bz-quote' } as const;
+  function render() {
+    for (const [name, storageKey] of Object.entries(keys)) {
+      let n = 0;
+      try {
+        const items = JSON.parse(localStorage.getItem(storageKey) || '[]') as { qty: number }[];
+        n = items.reduce((sum, i) => sum + (i.qty || 0), 0);
+      } catch {}
+      document.querySelectorAll<HTMLElement>(`[data-count="${name}"]`).forEach((el) => {
+        el.textContent = String(n);
+        el.hidden = n === 0;
+        el.parentElement?.setAttribute('aria-label', `${name === 'cart' ? 'Cart' : 'Quote list'}, ${n} items`);
+      });
+    }
+  }
+  render();
+  window.addEventListener('bz-store', render);
+  window.addEventListener('storage', render);
+</script>

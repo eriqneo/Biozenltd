@@ -1,0 +1,21 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "biozen",
+	"compatibility_date": "2026-11-16",
+	"compatibility_flags": ["global_fetch_strictly_public"],
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS",
+		// Unknown URLs show src/pages/404.astro with a real 404 status.
+		"not_found_handling": "404-page",
+		"html_handling": "auto-trailing-slash"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		// Public site settings. Secrets go in `wrangler secret put`, never here.
+		"PUBLIC_SITE_URL": "https://www.example.com"
+	}
+}

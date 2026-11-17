@@ -1,0 +1,49 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import ProductCard from '../../../components/ProductCard.astro';
+import { getProducts, getSubcategories, getTopCategories } from '../../../lib/catalog';
+import type { Category } from '../../../lib/types';
+
+export async function getStaticPaths() {
+  const tops = await getTopCategories();
+  const paths = [];
+  for (const parent of tops) {
+    for (const sub of await getSubcategories(parent.id)) {
+      paths.push({ params: { category: parent.slug, sub: sub.slug }, props: { parent, sub } });
+    }
+  }
+  return paths;
+}
+
+const { parent, sub } = Astro.props as { parent: Category; sub: Category };
+const [siblings, products] = await Promise.all([getSubcategories(parent.id), getProducts({ category: sub.id })]);
+---
+
+<Base title={`${sub.name} | ${parent.name}`} description={`${sub.name} in Kenya — prices, stock, warranty and installation.`}>
+  <div class="container-x py-8 space-y-6">
+    <Breadcrumbs items={[{ label: 'Shop', href: '/shop' }, { label: parent.name, href: `/shop/${parent.slug}` }, { label: sub.name }]} />
+    <h1 class="text-3xl font-bold tracking-tight">{sub.name}</h1>
+
+    <ul class="flex flex-wrap gap-2" aria-label={`Other ${parent.name} categories`}>
+      {siblings.map((s) => (
+        <li><a
+          href={`/shop/${parent.slug}/${s.slug}`}
+          class:list={['inline-block rounded-full px-4 py-2 text-sm font-medium ring-1', s.id === sub.id ? 'bg-brand-600 text-white ring-brand-600' : 'bg-white ring-ink-200 hover:ring-brand-600 hover:text-brand-700']}
+          aria-current={s.id === sub.id ? 'page' : undefined}
+        >{s.name}</a></li>
+      ))}
+    </ul>
+
+    {products.length ? (
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {products.map((p) => <ProductCard product={p} />)}
+      </div>
+    ) : (
+      <div class="card p-8 text-center space-y-3">
+        <p class="font-medium">No products listed here yet.</p>
+        <a href="/clinics/quote" class="btn-primary">Ask us to source it</a>
+      </div>
+    )}
+  </div>
+</Base>

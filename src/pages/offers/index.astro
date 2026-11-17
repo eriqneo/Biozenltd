@@ -1,0 +1,23 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { getOffers } from '../../lib/catalog';
+
+const offers = await getOffers();
+---
+
+<Base title="Offers" description="Current deals on medical equipment, plus equipment kits for new clinics and home care.">
+  <div class="container-x py-8 space-y-6">
+    <Breadcrumbs items={[{ label: 'Offers' }]} />
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <h1 class="text-3xl font-bold tracking-tight">Offers</h1>
+      <a href="/offers/kits" class="text-sm font-medium text-brand-700 hover:underline">Equipment kits & bundles →</a>
+    </div>
+    {offers.length ? (
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{offers.map((p) => <ProductCard product={p} />)}</div>
+    ) : (
+      <p class="card p-8 text-center text-ink-600">No offers running right now. Check back soon.</p>
+    )}
+  </div>
+</Base>

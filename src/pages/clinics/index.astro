@@ -1,0 +1,64 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { whatsappLink } from '../../lib/site';
+
+const steps = [
+  { n: '1', title: 'Send your list', text: 'Add items from the shop, describe what you need, or upload a PDF, spreadsheet or photo.' },
+  { n: '2', title: 'Get a priced quote', text: 'We reply within one working day with prices, lead times and delivery and installation costs.' },
+  { n: '3', title: 'Delivered & installed', text: 'We deliver across Kenya, commission the equipment and train your staff.' },
+];
+
+const benefits = [
+  { title: 'Bulk & facility pricing', text: 'Better prices on larger orders and repeat purchases.' },
+  { title: 'Installation & training', text: 'Commissioning and user training for monitors, beds, autoclaves, lab and theatre equipment.' },
+  { title: 'Warranty & servicing', text: 'Clear warranty terms and planned maintenance after the sale.' },
+  { title: 'Formal paperwork', text: 'Quotations, proforma invoices and delivery notes for your procurement records.' },
+];
+---
+
+<Base title="For clinics & hospitals" description="Quotes, bulk pricing, delivery, installation and servicing of medical equipment for clinics and hospitals in Kenya.">
+  <section class="bg-white border-b border-ink-200/70">
+    <div class="container-x py-12 space-y-5">
+      <Breadcrumbs items={[{ label: 'For clinics' }]} />
+      <h1 class="text-4xl font-bold tracking-tight max-w-3xl">Equip your clinic, ward or lab with one supplier.</h1>
+      <p class="text-lg text-ink-600 max-w-2xl">From a single exam table to a full new facility: priced quotations, delivery, installation and after-sales support.</p>
+      <div class="flex flex-wrap gap-3">
+        <a href="/clinics/quote" class="btn-primary">Start a quote</a>
+        <a href={whatsappLink('Hello Biozen, I am equipping a facility and need a quotation.')} target="_blank" rel="noopener" class="btn-secondary">Talk to us on WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-x py-12">
+    <h2 class="text-2xl font-bold tracking-tight mb-6">How it works</h2>
+    <ol class="grid gap-4 md:grid-cols-3">
+      {steps.map((s) => (
+        <li class="card p-6">
+          <span class="grid size-9 place-items-center rounded-full bg-brand-600 text-white font-semibold">{s.n}</span>
+          <p class="mt-4 font-semibold">{s.title}</p>
+          <p class="mt-1 text-sm text-ink-600">{s.text}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="container-x pb-12">
+    <h2 class="text-2xl font-bold tracking-tight mb-6">Why facilities choose Biozen</h2>
+    <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {benefits.map((b) => (
+        <li class="card p-5"><p class="font-semibold">{b.title}</p><p class="mt-1 text-sm text-ink-600">{b.text}</p></li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="container-x pb-4">
+    <div class="card p-6 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <p class="font-semibold">Ordering regularly?</p>
+        <p class="text-sm text-ink-600">Register your facility to save quotes and reorder in a few clicks.</p>
+      </div>
+      <a href="/clinics/register" class="btn-secondary">Register your facility</a>
+    </div>
+  </section>
+</Base>

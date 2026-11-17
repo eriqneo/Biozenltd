@@ -1,0 +1,21 @@
+---
+// Shows the first product photo, or a neutral placeholder until supplier
+// photos are uploaded to PocketBase.
+interface Props {
+  src?: string;
+  alt: string;
+  class?: string;
+}
+const { src, alt, class: cls = '' } = Astro.props;
+---
+
+{src ? (
+  <img src={src} alt={alt} loading="lazy" decoding="async" class:list={['object-contain bg-white', cls]} />
+) : (
+  <div class:list={['grid place-items-center bg-gradient-to-br from-brand-50 to-ink-100 text-brand-600/60', cls]} role="img" aria-label={`${alt} (photo coming soon)`}>
+    <svg viewBox="0 0 48 48" class="w-1/4 max-w-16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+      <rect x="6" y="6" width="36" height="36" rx="10" />
+      <path d="M24 15v18M15 24h18" stroke-linecap="round" />
+    </svg>
+  </div>
+)}

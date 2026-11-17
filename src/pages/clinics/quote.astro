@@ -1,0 +1,17 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import QuoteBuilder from '../../components/islands/QuoteBuilder';
+import { site } from '../../lib/site';
+---
+
+<Base title="Request a quotation" description="Send your equipment list and get a priced quotation within one working day. Delivery and installation across Kenya.">
+  <div class="container-x py-8 space-y-6">
+    <Breadcrumbs items={[{ label: 'For clinics', href: '/clinics' }, { label: 'Request a quote' }]} />
+    <header class="max-w-3xl space-y-2">
+      <h1 class="text-3xl font-bold tracking-tight">Request a quotation</h1>
+      <p class="text-ink-600">Add items from the shop, describe anything else you need, or upload your list. We reply with a priced quotation within one working day.</p>
+    </header>
+    <QuoteBuilder client:load whatsapp={site.whatsapp} />
+  </div>
+</Base>

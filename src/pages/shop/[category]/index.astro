@@ -1,0 +1,45 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import ProductCard from '../../../components/ProductCard.astro';
+import { getProducts, getSubcategories, getTopCategories } from '../../../lib/catalog';
+import type { Category } from '../../../lib/types';
+
+export async function getStaticPaths() {
+  const cats = await getTopCategories();
+  return cats.map((category) => ({ params: { category: category.slug }, props: { category } }));
+}
+
+const { category } = Astro.props as { category: Category };
+const [subs, products] = await Promise.all([getSubcategories(category.id), getProducts({ category: category.id })]);
+---
+
+<Base title={category.name} description={category.description}>
+  <div class="container-x py-8 space-y-6">
+    <Breadcrumbs items={[{ label: 'Shop', href: '/shop' }, { label: category.name }]} />
+    <header class="space-y-2 max-w-3xl">
+      <h1 class="text-3xl font-bold tracking-tight">{category.name}</h1>
+      <p class="text-ink-600">{category.description}</p>
+    </header>
+
+    {subs.length > 0 && (
+      <ul class="flex flex-wrap gap-2" aria-label="Subcategories">
+        {subs.map((s) => (
+          <li><a href={`/shop/${category.slug}/${s.slug}`} class="inline-block rounded-full bg-white px-4 py-2 text-sm font-medium ring-1 ring-ink-200 hover:ring-brand-600 hover:text-brand-700">{s.name}</a></li>
+        ))}
+      </ul>
+    )}
+
+    {products.length ? (
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {products.map((p) => <ProductCard product={p} />)}
+      </div>
+    ) : (
+      <div class="card p-8 text-center space-y-3">
+        <p class="font-medium">We're adding products to this category.</p>
+        <p class="text-sm text-ink-600">We stock and source {category.name.toLowerCase()} — send us your requirements.</p>
+        <a href="/clinics/quote" class="btn-primary">Request a quote</a>
+      </div>
+    )}
+  </div>
+</Base>

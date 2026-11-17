@@ -1,0 +1,29 @@
+---
+// Shell for sitemap pages whose content isn't written yet, so every route
+// exists and links never point to "#" (an issue on the inspiration site).
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+
+interface Props {
+  title: string;
+  intro: string;
+  crumbs?: { label: string; href?: string }[];
+  index?: boolean;
+}
+const { title, intro, crumbs = [], index = true } = Astro.props;
+---
+
+<Base title={title} description={intro} index={index}>
+  <div class="container-x py-8 space-y-6">
+    <Breadcrumbs items={[...crumbs, { label: title }]} />
+    <header class="max-w-3xl space-y-3">
+      <h1 class="text-3xl font-bold tracking-tight">{title}</h1>
+      <p class="text-lg text-ink-600">{intro}</p>
+    </header>
+    <div class="card max-w-3xl p-6 prose-bz">
+      <slot>
+        <p>Content for this page is coming soon. Questions in the meantime? <a class="text-brand-700 underline" href="/contact">Contact us</a>.</p>
+      </slot>
+    </div>
+  </div>
+</Base>

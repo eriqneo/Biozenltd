@@ -1,0 +1,141 @@
+---
+import Base from '../layouts/Base.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { getProducts, getTopCategories } from '../lib/catalog';
+import { formatKES } from '../lib/format';
+import { site, whatsappLink } from '../lib/site';
+
+const categories = await getTopCategories();
+const featured = await getProducts({ featured: true, limit: 8 });
+
+const needs = [
+  { title: 'Setting up a new clinic', href: '/shop-by-need#new-clinic', text: 'Exam tables, diagnostic sets, autoclaves and more.' },
+  { title: 'Care at home', href: '/shop-by-need#home-care', text: 'Beds, oxygen, wheelchairs and BP monitors.' },
+  { title: 'Maternity unit', href: '/shop-by-need#maternity', text: 'Delivery beds, warmers, dopplers and scales.' },
+  { title: 'Laboratory setup', href: '/shop-by-need#lab', text: 'Analyzers, centrifuges and microscopes.' },
+];
+
+const promises = [
+  { title: 'Installation & training', text: 'We set up larger equipment and show your team how to use it.' },
+  { title: 'Warranty on every item', text: 'Clear warranty terms on each product page, with local support.' },
+  { title: 'Delivery countrywide', text: `Free in Nairobi over ${formatKES(site.freeDeliveryThreshold)}; freight for large items.` },
+  { title: 'M-PESA, card or invoice', text: 'Pay online, or request a quotation and pay by bank transfer.' },
+];
+---
+
+<Base title={site.name} description="Medical equipment, hospital furniture and lab equipment for clinics, hospitals and home care in Kenya. Installation, warranty and countrywide delivery.">
+  <!-- Hero -->
+  <section class="bg-white border-b border-ink-200/70">
+    <div class="container-x grid gap-10 py-14 lg:grid-cols-2 lg:items-center">
+      <div class="space-y-5">
+        <p class="eyebrow">Medical equipment · Kenya</p>
+        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight leading-[1.05]">
+          Equipment for clinics, hospitals and care at home.
+        </h1>
+        <p class="text-lg text-ink-600 max-w-xl">
+          Monitors, beds, oxygen, lab and theatre equipment — delivered, installed and backed by warranty.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href="/shop" class="btn-primary">Shop equipment</a>
+          <a href="/clinics/quote" class="btn-secondary">Equipping a facility? Get a quote</a>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <a href="/shop" class="card p-5 bg-brand-50 ring-brand-100 hover:ring-brand-600/40">
+          <p class="eyebrow">For everyone</p>
+          <p class="mt-2 text-lg font-semibold">Buy online</p>
+          <p class="mt-1 text-sm text-ink-600">Clear prices, stock and warranty. Pay by M-PESA or card.</p>
+        </a>
+        <a href="/clinics" class="card p-5 bg-ink-900 text-white ring-ink-900 hover:bg-ink-700">
+          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-brand-200">For clinics</p>
+          <p class="mt-2 text-lg font-semibold">Quotes &amp; bulk pricing</p>
+          <p class="mt-1 text-sm text-ink-200">Send your list, get a priced quotation in one working day.</p>
+        </a>
+        <div class="card col-span-2 p-5 flex flex-wrap items-center justify-between gap-3">
+          <p class="text-sm text-ink-600">Not sure what you need? Talk to our team.</p>
+          <a href={whatsappLink('Hello Biozen, I need help choosing equipment.')} target="_blank" rel="noopener" class="btn-secondary">Chat on WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="container-x py-12">
+    <div class="flex items-end justify-between gap-4 mb-6">
+      <h2 class="text-2xl font-bold tracking-tight">Shop by category</h2>
+      <a href="/shop" class="text-sm font-medium text-brand-700 hover:underline">All equipment →</a>
+    </div>
+    <ul class="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+      {categories.map((c) => (
+        <li>
+          <a href={`/shop/${c.slug}`} class="card block h-full p-4 hover:ring-brand-600/40 hover:shadow-sm">
+            <p class="font-medium leading-snug">{c.name}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- Featured -->
+  <section class="container-x pb-12">
+    <div class="flex items-end justify-between gap-4 mb-6">
+      <h2 class="text-2xl font-bold tracking-tight">Popular equipment</h2>
+      <a href="/shop" class="text-sm font-medium text-brand-700 hover:underline">See all →</a>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {featured.map((p) => <ProductCard product={p} />)}
+    </div>
+  </section>
+
+  <!-- Clinic banner -->
+  <section class="container-x pb-12">
+    <div class="card overflow-hidden bg-brand-800 text-white ring-brand-800 grid gap-6 p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+      <div class="space-y-2">
+        <h2 class="text-2xl font-bold">Equipping a clinic or ward?</h2>
+        <p class="text-brand-100 max-w-2xl">Build a quote list from the shop or upload your own. We'll price it, plan delivery and installation, and reply within one working day.</p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <a href="/clinics/quote" class="btn-primary bg-white text-brand-800 hover:bg-brand-50">Start a quote</a>
+        <a href="/clinics" class="btn-secondary bg-transparent text-white ring-white/40 hover:bg-white/10">For clinics</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shop by need -->
+  <section class="container-x pb-12">
+    <h2 class="text-2xl font-bold tracking-tight mb-6">Shop by need</h2>
+    <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {needs.map((n) => (
+        <li><a href={n.href} class="card block h-full p-5 hover:ring-brand-600/40">
+          <p class="font-semibold">{n.title}</p>
+          <p class="mt-1 text-sm text-ink-600">{n.text}</p>
+        </a></li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- Promises -->
+  <section class="bg-white border-y border-ink-200/70">
+    <div class="container-x grid gap-6 py-12 sm:grid-cols-2 lg:grid-cols-4">
+      {promises.map((p) => (
+        <div>
+          <p class="font-semibold">{p.title}</p>
+          <p class="mt-1 text-sm text-ink-600">{p.text}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Guides -->
+  <section class="container-x py-12">
+    <div class="flex items-end justify-between gap-4 mb-6">
+      <h2 class="text-2xl font-bold tracking-tight">Buying guides</h2>
+      <a href="/guides" class="text-sm font-medium text-brand-700 hover:underline">All guides →</a>
+    </div>
+    <ul class="grid gap-4 sm:grid-cols-3">
+      <li><a href="/guides" class="card block p-5 hover:ring-brand-600/40"><p class="font-semibold">Choosing a hospital bed</p><p class="mt-1 text-sm text-ink-600">Manual, semi-electric or ICU — what fits your ward.</p></a></li>
+      <li><a href="/guides" class="card block p-5 hover:ring-brand-600/40"><p class="font-semibold">New clinic equipment checklist</p><p class="mt-1 text-sm text-ink-600">Everything a small outpatient clinic needs on day one.</p></a></li>
+      <li><a href="/guides" class="card block p-5 hover:ring-brand-600/40"><p class="font-semibold">Picking an oxygen concentrator</p><p class="mt-1 text-sm text-ink-600">Flow rate, purity, noise and running costs explained.</p></a></li>
+    </ul>
+  </section>
+</Base>

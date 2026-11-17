@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import CartView from '../components/islands/CartView';
+import { site } from '../lib/site';
+---
+
+<Base title="Your cart" index={false}>
+  <div class="container-x py-8 space-y-6">
+    <h1 class="text-3xl font-bold tracking-tight">Your cart</h1>
+    <CartView client:load freeDeliveryThreshold={site.freeDeliveryThreshold} />
+  </div>
+</Base>
