@@ -27,6 +27,13 @@ Requires Node 22.23+.
 3. Build command: `npm run build` · Deploy command: `npx wrangler deploy`.
 4. Every push to `main` deploys automatically; other branches get preview URLs.
 
+### Option C — Cloudflare Pages (current setup: biozenltd.pages.dev)
+Pages project settings → Build:
+- Build command: `npm run build`
+- **Build output directory: `dist/client`** (not `dist` — the Astro Cloudflare adapter puts the site in `dist/client`; with `dist` the homepage 404s)
+
+Pages ignores `wrangler.jsonc` (it logs a harmless "not valid" notice) but honours `public/_headers` and the 404 page.
+
 ### Custom domain
 Cloudflare dashboard → **Workers & Pages → biozen → Settings → Domains & Routes → Add custom domain**. Then replace `https://www.example.com` in:
 - `astro.config.mjs` (`site`)
