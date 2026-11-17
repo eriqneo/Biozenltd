@@ -19,8 +19,7 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
 <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-ink-200/70">
   <div class="container-x flex items-center gap-4 py-3">
     <a href="/" class="flex items-center gap-2 shrink-0" aria-label={`${site.shortName} home`}>
-      <span class="grid size-9 place-items-center rounded-xl bg-brand-600 text-white font-bold">B</span>
-      <span class="text-lg font-bold tracking-tight">{site.shortName}</span>
+      <img src="/images/brand/biozen-logo.png" alt={site.name} width="362" height="90" class="h-9 sm:h-11 w-auto" fetchpriority="high" />
     </a>
 
     <form action="/shop" method="get" role="search" class="hidden md:flex flex-1 max-w-xl mx-auto">

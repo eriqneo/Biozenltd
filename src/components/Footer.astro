@@ -6,7 +6,9 @@ const year = new Date().getFullYear();
 <footer class="mt-16 bg-ink-900 text-ink-200">
   <div class="container-x grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-6">
     <div class="lg:col-span-2 space-y-3">
-      <p class="text-lg font-bold text-white">{site.name}</p>
+      <a href="/" class="inline-block rounded-xl bg-white px-4 py-3" aria-label={`${site.name} home`}>
+        <img src="/images/brand/biozen-logo.png" alt={site.name} width="362" height="90" loading="lazy" class="h-10 w-auto" />
+      </a>
       <p class="text-sm text-ink-200/80">{site.tagline}.</p>
       <ul class="text-sm space-y-1">
         <li><a href={`tel:${site.phoneIntl}`} class="hover:text-white">{site.phone}</a></li>
