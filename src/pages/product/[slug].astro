@@ -57,6 +57,9 @@ const jsonLd = {
     <div class="grid gap-8 lg:grid-cols-2">
       <div class="card overflow-hidden">
         <ProductImage src={p.images[0]} alt={p.name} class="aspect-[4/3] w-full" />
+        {p.images[0]?.endsWith('.svg') && (
+          <p class="border-t border-ink-100 px-4 py-2 text-xs text-ink-500">Illustration only — the supplied model may look different.</p>
+        )}
       </div>
 
       <div class="space-y-5">
@@ -82,8 +85,8 @@ const jsonLd = {
         </div>
 
         <ul class="grid grid-cols-2 gap-3 text-sm">
-          <li class="card p-3"><span class="block text-ink-500">Warranty</span><span class="font-medium">{p.warranty_months} months</span></li>
-          <li class="card p-3"><span class="block text-ink-500">Installation</span><span class="font-medium">{p.installation_available ? 'Available' : 'Not required'}</span></li>
+          <li class="card p-3"><span class="block text-ink-500">Warranty</span><span class="font-medium">{p.warranty_months ? `${p.warranty_months} months` : 'Confirmed on quote'}</span></li>
+          <li class="card p-3"><span class="block text-ink-500">Installation</span><span class="font-medium">{p.installation_available ? 'Available' : 'On request'}</span></li>
         </ul>
 
         <BuyBox
@@ -111,10 +114,23 @@ const jsonLd = {
         <p class="leading-relaxed text-ink-700">{p.description}</p>
       </section>
       <section class="card p-6 space-y-3">
-        <h2 class="text-xl font-semibold">What's in the box</h2>
-        <ul class="list-disc pl-5 space-y-1 text-sm text-ink-700">
-          {p.in_the_box.map((i) => <li>{i}</li>)}
-        </ul>
+        {p.in_the_box.length > 0 ? (
+          <>
+            <h2 class="text-xl font-semibold">What's in the box</h2>
+            <ul class="list-disc pl-5 space-y-1 text-sm text-ink-700">
+              {p.in_the_box.map((i) => <li>{i}</li>)}
+            </ul>
+          </>
+        ) : (
+          <>
+            <h2 class="text-xl font-semibold">How ordering works</h2>
+            <ol class="list-decimal pl-5 space-y-1 text-sm text-ink-700">
+              <li>Add this item to your quote list.</li>
+              <li>We confirm model, price and lead time within one working day.</li>
+              <li>We deliver{p.installation_available ? ', install and train your team' : ' across Kenya'}.</li>
+            </ol>
+          </>
+        )}
         {p.manuals.length > 0 && (
           <div class="pt-2">
             <h3 class="font-medium">Manuals</h3>
@@ -122,17 +138,20 @@ const jsonLd = {
           </div>
         )}
       </section>
-      <section class="card p-6 lg:col-span-3">
-        <h2 class="text-xl font-semibold mb-4">Specifications</h2>
-        <dl class="grid sm:grid-cols-2 gap-x-8 text-sm">
-          {Object.entries(p.specs).map(([k, v]) => (
-            <div class="flex justify-between gap-4 border-b border-ink-100 py-2.5">
-              <dt class="text-ink-500">{k}</dt>
-              <dd class="font-medium text-right">{v}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+      {Object.keys(p.specs).length > 0 && (
+        <section class="card p-6 lg:col-span-3">
+          <h2 class="text-xl font-semibold mb-4">Specifications</h2>
+          <dl class="grid sm:grid-cols-2 gap-x-8 text-sm">
+            {Object.entries(p.specs).map(([k, v]) => (
+              <div class="flex justify-between gap-4 border-b border-ink-100 py-2.5">
+                <dt class="text-ink-500">{k}</dt>
+                <dd class="font-medium text-right">{v}</dd>
+              </div>
+            ))}
+          </dl>
+          <p class="mt-3 text-xs text-ink-500">Specifications vary by model and are confirmed on your quotation.</p>
+        </section>
+      )}
     </div>
 
     {related.length > 0 && (

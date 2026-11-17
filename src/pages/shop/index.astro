@@ -2,26 +2,27 @@
 import Base from '../../layouts/Base.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import ShopBrowser from '../../components/islands/ShopBrowser';
-import { getAllProducts, getBrands, getTopCategories, rootCategoryId } from '../../lib/catalog';
+import { getBrands, getTopCategories } from '../../lib/catalog';
+import { getShopIndex } from '../../lib/shop-index';
 
-const [products, categories, brands] = await Promise.all([getAllProducts(), getTopCategories(), getBrands()]);
+const [index, categories, brands] = await Promise.all([getShopIndex(), getTopCategories(), getBrands()]);
 
-// Send only what the cards need to the browser.
-const lite = products.map((p) => ({
-  id: p.id, slug: p.slug, name: p.name, summary: p.summary, price: p.price,
-  compare_at_price: p.compare_at_price, quote_only: p.quote_only, stock: p.stock,
-  brand: p.brand, created: p.created, featured: p.featured,
-  root: rootCategoryId(p.category), image: p.images[0],
-}));
+// Only the first page goes into the HTML; the full index loads from
+// /shop-index.json so the page stays light with a large catalogue.
+const initial = [...index]
+  .sort((a, b) => Number(b.featured) - Number(a.featured) || b.created.localeCompare(a.created))
+  .slice(0, 24);
 ---
 
-<Base title="Shop medical equipment" description="Browse medical equipment, hospital furniture, laboratory, theatre and rehab equipment with clear prices, stock and warranty.">
+<Base title="Shop medical equipment" description="Browse medical equipment, hospital furniture, laboratory, theatre and rehab equipment. Request a quotation with delivery and installation across Kenya.">
   <div class="container-x py-8 space-y-6">
     <Breadcrumbs items={[{ label: 'Shop' }]} />
     <h1 class="text-3xl font-bold tracking-tight">All equipment</h1>
     <ShopBrowser
       client:load
-      products={lite}
+      initial={initial}
+      total={index.length}
+      indexUrl="/shop-index.json"
       categories={categories.map((c) => ({ id: c.id, name: c.name }))}
       brands={brands.map((b) => ({ id: b.id, name: b.name }))}
     />

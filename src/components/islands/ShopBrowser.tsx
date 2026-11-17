@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { formatKES, stockLabel, stockTone } from '../../lib/format';
-import type { Product } from '../../lib/types';
-
-type Lite = Pick<Product, 'id' | 'slug' | 'name' | 'summary' | 'price' | 'compare_at_price' | 'quote_only' | 'stock' | 'brand' | 'created' | 'featured'> & {
-  root: string;
-  image?: string;
-};
+import type { ShopItem as Lite } from '../../lib/shop-index';
 
 interface Props {
-  products: Lite[];
+  /** First page of products, server-rendered so the page works before JS. */
+  initial: Lite[];
+  total: number;
+  /** URL of the full product index (fetched after the page loads). */
+  indexUrl: string;
   categories: { id: string; name: string }[];
   brands: { id: string; name: string }[];
 }
 
 type Sort = 'featured' | 'newest' | 'price-asc' | 'price-desc' | 'name';
+const PAGE = 24;
 
 const PRICE_BANDS = [
   { id: '', label: 'Any price' },
@@ -29,7 +29,10 @@ const PRICE_BANDS = [
  * connected and the catalogue grows, move this filtering into a PocketBase
  * query (filter + sort + pagination) on a server-rendered /shop page.
  */
-export default function ShopBrowser({ products, categories, brands }: Props) {
+export default function ShopBrowser({ initial, total, indexUrl, categories, brands }: Props) {
+  const [products, setProducts] = useState<Lite[]>(initial);
+  const [loading, setLoading] = useState(initial.length < total);
+  const [visible, setVisible] = useState(PAGE);
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('');
   const [brand, setBrand] = useState('');
@@ -41,7 +44,16 @@ export default function ShopBrowser({ products, categories, brands }: Props) {
     const p = new URLSearchParams(window.location.search);
     setQ(p.get('q') ?? '');
     setCat(p.get('category') ?? '');
-  }, []);
+    if (initial.length < total) {
+      fetch(indexUrl)
+        .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+        .then((all: Lite[]) => setProducts(all))
+        .catch(() => { /* keep the first page if the index can't load */ })
+        .finally(() => setLoading(false));
+    }
+  }, [indexUrl, initial.length, total]);
+
+  useEffect(() => setVisible(PAGE), [q, cat, brand, band, inStock, sort]);
 
   const results = useMemo(() => {
     const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -115,7 +127,9 @@ export default function ShopBrowser({ products, categories, brands }: Props) {
 
       <section aria-live="polite">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <p className="text-sm text-ink-600">{results.length} {results.length === 1 ? 'product' : 'products'}</p>
+          <p className="text-sm text-ink-600">
+            {loading ? `Loading ${total} products…` : `${results.length} ${results.length === 1 ? 'product' : 'products'}`}
+          </p>
           <label className="flex items-center gap-2 text-sm">
             <span className="text-ink-600">Sort by</span>
             <select className="input w-auto" value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
@@ -136,7 +150,7 @@ export default function ShopBrowser({ products, categories, brands }: Props) {
           </div>
         ) : (
           <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {results.map((p) => {
+            {results.slice(0, visible).map((p) => {
               const onSale = !p.quote_only && p.compare_at_price && p.compare_at_price > p.price;
               return (
                 <li key={p.id} className="card group overflow-hidden hover:shadow-md transition">
@@ -171,6 +185,13 @@ export default function ShopBrowser({ products, categories, brands }: Props) {
               );
             })}
           </ul>
+        )}
+        {results.length > visible && (
+          <div className="mt-6 text-center">
+            <button type="button" className="btn-secondary" onClick={() => setVisible((v) => v + PAGE)}>
+              Show more ({results.length - visible} left)
+            </button>
+          </div>
         )}
       </section>
     </div>
